@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cupcake.ui.OrderViewModel
 import com.example.cupcake.data.DataSource
@@ -36,12 +37,13 @@ import com.example.cupcake.ui.StartOrderScreen
 
 @Composable
 fun CupcakeAppBar(
+    currentScreen: Screens,
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
-        title = { Text(stringResource(id = R.string.app_name)) },
+        title = { Text(stringResource(currentScreen.title)) },
         colors = TopAppBarDefaults.mediumTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -65,11 +67,18 @@ fun CupcakeApp(
     navController: NavHostController = rememberNavController()
 ) {
 
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = Screens.valueOf(
+        backStackEntry?.destination?.route ?: Screens.Start.name
+    )
+
+
     Scaffold(
         topBar = {
             CupcakeAppBar(
-                canNavigateBack = false,
-                navigateUp = { /* TODO: implement back navigation */ }
+                canNavigateBack = navController.previousBackStackEntry != null,
+                currentScreen = currentScreen,
+                navigateUp = { navController.navigateUp() }
             )
         }
     ) { innerPadding ->
